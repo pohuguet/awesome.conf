@@ -29,7 +29,7 @@ function update_volume(widget)
    local level = ""
  
    status = string.match(status, "%[(o[^%]]*)%]")
-   local muted = string.find(status, "on", 1, false)
+   local muted = string.find(status, "off", 1, true)
 
    if volume == 0 or muted then
        level = "muted"
