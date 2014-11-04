@@ -9,7 +9,12 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
+
 local menubar = require("menubar")
+local blingbling = require("blingbling")
+local vicious = require("vicious")
+
+-- My widgets
 local volume = require("volume")
 local battery = require("battery")
 
@@ -41,7 +46,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init("~/.config/awesome/themes/default/theme.lua")
+beautiful.init("~/.config/awesome/themes/peio/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "xterm -rv"
@@ -131,8 +136,15 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Create a textclock widget
 mytextclock = awful.widget.textclock(" %d/%m/%Y %H:%M ")
 
+local syswidgets = require("syswidgets")
+
+shutdown=blingbling.system.shutdownmenu(beautiful.shutdown,
+                                        beautiful.accept,
+                                        beautiful.cancel)
+
 -- Create a wibox for each screen and add it
 mywibox = {}
+mybottombox = {}
 mypromptbox = {}
 mylayoutbox = {}
 mytaglist = {}
@@ -200,11 +212,13 @@ for s = 1, screen.count() do
 
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
+    mybottombox[s] = awful.wibox({ position = "bottom", screen = s })
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
     left_layout:add(mylauncher)
     left_layout:add(mytaglist[s])
+    left_layout:add(mylayoutbox[s])
     left_layout:add(mypromptbox[s])
 
     -- Widgets that are aligned to the right
@@ -213,7 +227,16 @@ for s = 1, screen.count() do
     right_layout:add(battery_widget)
     right_layout:add(volume_widget)
     right_layout:add(mytextclock)
-    right_layout:add(mylayoutbox[s])
+    --right_layout:add(shutdown)
+    right_layout:add(syswidget.pkg_updates)
+
+
+    local bottom_layout = wibox.layout.fixed.horizontal()
+    bottom_layout:add(syswidget.cpu_graph)
+    bottom_layout:add(syswidget.mem_graph)
+    bottom_layout:add(syswidget.home_fs_usage)
+    bottom_layout:add(syswidget.root_fs_usage)
+
 
     -- Now bring it all together (with the tasklist in the middle)
     local layout = wibox.layout.align.horizontal()
@@ -222,6 +245,7 @@ for s = 1, screen.count() do
     layout:set_right(right_layout)
 
     mywibox[s]:set_widget(layout)
+    mybottombox[s]:set_widget(bottom_layout)
 end
 -- }}}
 
@@ -320,9 +344,9 @@ clientkeys = awful.util.table.join(
             c.maximized_vertical   = not c.maximized_vertical
         end),
     awful.key({ }, "XF86AudioRaiseVolume", function ()
-        awful.util.spawn("amixer set Master 9%+", false) end),
+        awful.util.spawn("amixer set Master 1dB+", false) end),
     awful.key({ }, "XF86AudioLowerVolume", function ()
-        awful.util.spawn("amixer set Master 9%-", false) end),
+        awful.util.spawn("amixer set Master 1dB-", false) end),
     awful.key({ }, "XF86AudioMute", function ()
         awful.util.spawn("amixer set Master toggle", false) end)
 )

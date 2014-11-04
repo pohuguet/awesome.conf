@@ -40,7 +40,11 @@ function update_volume(widget)
    else
        level = "high"
    end
-   if volume == 100 and not full_notified and not muted then
+
+   if volume == 100
+      and not full_notified
+      and not muted
+   then
       naughty.notify({ text = "Volume : "..volume.."%" })
       full_notified = true
    elseif volume < 100 or muted then
