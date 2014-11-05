@@ -17,6 +17,8 @@ local vicious = require("vicious")
 -- My widgets
 local volume = require("volume")
 local battery = require("battery")
+local syswidgets = require("syswidgets")
+local network = require("network")
 
 
 -- {{{ Error handling
@@ -117,7 +119,6 @@ myappsmenu = {
    { "lxappearance", "lxappearance" }
 }
 
-
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
                                   --  { "applications", myappsmenu },
                                     { "open terminal", terminal }
@@ -136,7 +137,11 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Create a textclock widget
 mytextclock = awful.widget.textclock(" %d/%m/%Y %H:%M ")
 
-local syswidgets = require("syswidgets")
+-- Separators
+spr_small = wibox.widget.textbox(' ')
+spr_medium = wibox.widget.textbox('  ')
+spr_large = wibox.widget.textbox('   ')
+
 
 shutdown=blingbling.system.shutdownmenu(beautiful.shutdown,
                                         beautiful.accept,
@@ -212,30 +217,42 @@ for s = 1, screen.count() do
 
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
-    mybottombox[s] = awful.wibox({ position = "bottom", screen = s })
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
-    left_layout:add(mylauncher)
+    if s == 1 then
+       left_layout:add(mylauncher)
+    end
     left_layout:add(mytaglist[s])
     left_layout:add(mylayoutbox[s])
     left_layout:add(mypromptbox[s])
+    if s == 1 then
+       left_layout:add(syswidget.cpu_graph)
+       left_layout:add(syswidget.mem_graph)
+       left_layout:add(syswidget.home_fs_usage)
+       left_layout:add(syswidget.root_fs_usage)
+    end
 
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
-    if s == 1 then right_layout:add(wibox.widget.systray()) end
-    right_layout:add(battery_widget)
-    right_layout:add(volume_widget)
+    if s == 1 then
+       right_layout:add(wibox.widget.systray())
+       right_layout:add(spr_medium)
+       right_layout:add(network.wifi)
+       right_layout:add(spr_medium)
+       right_layout:add(battery_widget)
+       right_layout:add(spr_medium)
+       right_layout:add(volume_widget)
+       right_layout:add(spr_small)
+    end
+
     right_layout:add(mytextclock)
-    --right_layout:add(shutdown)
-    right_layout:add(syswidget.pkg_updates)
 
-
-    local bottom_layout = wibox.layout.fixed.horizontal()
-    bottom_layout:add(syswidget.cpu_graph)
-    bottom_layout:add(syswidget.mem_graph)
-    bottom_layout:add(syswidget.home_fs_usage)
-    bottom_layout:add(syswidget.root_fs_usage)
+    if s == 1 then
+       --right_layout:add(shutdown)
+       right_layout:add(spr_small)
+       right_layout:add(syswidget.pkg_updates)
+    end
 
 
     -- Now bring it all together (with the tasklist in the middle)
@@ -245,7 +262,6 @@ for s = 1, screen.count() do
     layout:set_right(right_layout)
 
     mywibox[s]:set_widget(layout)
-    mybottombox[s]:set_widget(bottom_layout)
 end
 -- }}}
 
@@ -291,6 +307,7 @@ globalkeys = awful.util.table.join(
 
     -- Standard program
     awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
+    awful.key({ modkey, "Control" }, "Return", function () awful.util.spawn(terminal.." -e su") end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
