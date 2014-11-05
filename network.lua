@@ -6,12 +6,18 @@ local awful = require("awful")
 local naughty = require("naughty")
 
 local icon_path = awful.util.getdir("config").."/icons/"
+local mouse_over
 
 w = {}
-
 w.wifi = wibox.widget.imagebox()
-w.wifi:fit(14,14)
-w.wifi:set_resize(true)
+
+w.wifi:connect_signal("mouse::enter", function()
+   local text = "Connecté à "..w.wifi.ssid..", signal : "..w.wifi.linp.."%"
+   mouse_over = naughty.notify({ text = text })
+end)
+w.wifi:connect_signal("mouse::leave", function()
+   naughty.destroy(mouse_over)
+end)
 vicious.register(w.wifi, vicious.widgets.wifi, function(widget, args)
    widget.ssid = args['{ssid}']
    widget.rate = args['{rate}']

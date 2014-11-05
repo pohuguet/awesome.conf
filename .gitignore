@@ -1,3 +1,5 @@
-themes
+themes/*
+!themes/peio
+
+
 rc.lua.orig
-vicious

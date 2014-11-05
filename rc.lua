@@ -2,12 +2,10 @@
 local gears = require("gears")
 local awful = require("awful")
 awful.rules = require("awful.rules")
-require("awful.autofocus")
--- Widget and layout library
+awful.autofocus = require("awful.autofocus")
+
 local wibox = require("wibox")
--- Theme handling library
 local beautiful = require("beautiful")
--- Notification library
 local naughty = require("naughty")
 
 local menubar = require("menubar")
@@ -19,7 +17,6 @@ local volume = require("volume")
 local battery = require("battery")
 local syswidgets = require("syswidgets")
 local network = require("network")
-
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -104,7 +101,8 @@ myawesomemenu = {
    { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awesome.conffile },
    { "restart", awesome.restart },
-   { "quit", awesome.quit },
+   { " ", nil },
+   { "logout", awesome.quit },
    { "reboot", "reboot" },
    { "shutdown", "shutdown -h now" }
 }
@@ -119,14 +117,18 @@ myappsmenu = {
    { "lxappearance", "lxappearance" }
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                  --  { "applications", myappsmenu },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+mymainmenu = awful.menu({
+   items = {
+      { "awesome", myawesomemenu, beautiful.awesome_icon },
+      -- { "applications", myappsmenu },
+      { "open terminal", terminal, beautiful.terminal_icon }
+   }
+})
 
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+mylauncher = awful.widget.launcher({
+   image = beautiful.awesome_icon,
+   menu = mymainmenu
+})
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -143,9 +145,13 @@ spr_medium = wibox.widget.textbox('  ')
 spr_large = wibox.widget.textbox('   ')
 
 
-shutdown=blingbling.system.shutdownmenu(beautiful.shutdown,
-                                        beautiful.accept,
-                                        beautiful.cancel)
+system_menu = blingbling.system.mainmenu(
+   beautiful.shutdown,
+   beautiful.shutdown,
+   beautiful.reboot,
+   beautiful.logout,
+   beautiful.lock
+)
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -249,9 +255,10 @@ for s = 1, screen.count() do
     right_layout:add(mytextclock)
 
     if s == 1 then
-       --right_layout:add(shutdown)
        right_layout:add(spr_small)
        right_layout:add(syswidget.pkg_updates)
+       right_layout:add(spr_small)
+       right_layout:add(system_menu)
     end
 
 

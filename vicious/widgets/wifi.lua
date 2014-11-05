@@ -74,7 +74,8 @@ local function worker(format, warg)
 
     -- SSID can have almost anything in it
     winfo["{ssid}"] = helpers.escape(
-      string.match(iw, 'SSID[=:]([%s]?[^\n]*)'
+      --string.match(iw, 'SSID[=:]([%s]?[^\n]*)'
+      string.match(iw, 'SSID[=:][%s]?([^\n]*)'
     ) or winfo["{ssid}"])
 
     -- Modes are simple, but also match the "-" in Ad-Hoc
